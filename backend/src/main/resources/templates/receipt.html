@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"><head><meta charset="utf-8"><title>EquiFlow loan receipt</title>
+<style>body{font:16px Arial,sans-serif;margin:50px;color:#183831}h1{font-size:30px}dl{display:grid;grid-template-columns:180px 1fr;gap:16px}dt{font-weight:bold}dd{margin:0}footer{margin-top:50px;border-top:1px solid #aaa;padding-top:20px}.print{margin-top:30px}@media print{.print{display:none}}</style>
+</head><body><p>EquiFlow / CAMPUS EQUIPMENT DESK</p><h1>Equipment loan receipt</h1>
+<dl><dt>Reference</dt><dd th:text="${record.reference}"></dd><dt>Requester</dt><dd th:text="${record.requesterName}"></dd>
+<dt>Equipment</dt><dd th:text="${record.equipmentName}"></dd><dt>Asset tag</dt><dd th:text="${record.assetTag}"></dd>
+<dt>Collection desk</dt><dd th:text="${record.location}"></dd><dt>Dates</dt><dd><span th:text="${record.startDate}"></span> to <span th:text="${record.endDate}"></span></dd>
+<dt>Status</dt><dd th:text="${record.status}"></dd><dt>Purpose</dt><dd th:text="${record.purpose}"></dd><dt>Desk note</dt><dd th:text="${record.reviewNote}"></dd></dl>
+<footer>Borrower signature: ____________________ &nbsp; Desk signature: ____________________</footer><p class="print">Use your browser's Print command to print or save this receipt.</p></body></html>

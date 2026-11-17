@@ -1,0 +1,52 @@
+name: equiflow-portable
+
+x-mysql-ready: &mysql-ready
+  mysql:
+    condition: service_healthy
+
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_HOST: localhost
+      MYSQL_ROOT_PASSWORD: ${EQUIFLOW_MYSQL_ROOT_PASSWORD:?Set the local MySQL root password}
+      MYSQL_USER: equiflow
+      MYSQL_PASSWORD: ${EQUIFLOW_DATABASE_PASSWORD:?Set the local MySQL application password}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ../backend/database/equiflow-microservices.sql:/docker-entrypoint-initdb.d/10-equiflow.sql:ro
+    configs:
+      - source: mysql-grants
+        target: /docker-entrypoint-initdb.d/20-equiflow-grants.sql
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          MYSQL_PWD="$${MYSQL_PASSWORD}" mysql --protocol=TCP
+          --host=127.0.0.1 --user=equiflow --ssl-mode=REQUIRED
+          --execute="SELECT 1 FROM equiflow_lending.equipment LIMIT 1" >/dev/null 2>&1
+      interval: 5s
+      timeout: 5s
+      start_period: 40s
+      retries: 24
+
+  identity:
+    depends_on: *mysql-ready
+  notification:
+    depends_on: *mysql-ready
+  maintenance:
+    depends_on: *mysql-ready
+  lending:
+    depends_on: *mysql-ready
+
+configs:
+  mysql-grants:
+    content: |
+      ALTER USER 'equiflow'@'%' REQUIRE SSL;
+      GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX, REFERENCES ON equiflow_identity.* TO 'equiflow'@'%';
+      GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX, REFERENCES ON equiflow_notification.* TO 'equiflow'@'%';
+      GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX, REFERENCES ON equiflow_maintenance.* TO 'equiflow'@'%';
+      GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX, REFERENCES ON equiflow_lending.* TO 'equiflow'@'%';
+
+volumes:
+  mysql-data:
